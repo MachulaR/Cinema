@@ -1,14 +1,11 @@
+    <?php require APPROOT . '/views/inc/header.php'; ?>
 <?php if ($data['confirm'] === 1) {
     header( "refresh:10;url=".URLROOT );
     ?>
-
-    <?php require APPROOT . '/views/inc/header.php'; ?>
-
     <h3>Rezerwacja złożona</h3>
     <p> Dziekujemy za złożenie rezerwacji <?php echo $data['reservation_data']['name'] . ' ' . $data['reservation_data']['last-name'] .'.<br />'?>
         Na podany e-mail wysłaliśmy potwierdzenie rezerwacji. Do zobaczenia w kinie!
     </p>
-
 
     <?php
 } else if($data['confirm'] === 0) { ?>

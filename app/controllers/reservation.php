@@ -15,30 +15,40 @@ class reservation extends controller {
     }
 
     public function confirm_reservation(){
+        session_start();
+        $viewData = [];
+        if ($_POST['captcha_challenge'] && $_SESSION['captcha_text'] && $_SESSION['captcha_text'] === $_POST['captcha_challenge']){
+            $this->confirmed($_POST);
+            die;
+        } else if ($_POST['captcha_challenge'] && $_SESSION['captcha_text'] && $_SESSION['captcha_text'] !== $_POST['captcha_challenge']){
+            $_SESSION['Error'] = "Captcha niepoprawna. Spróbuj ponownie.";
+            $viewData['form_data'] = [
+                'email' => $_POST['email'],
+                'name' => $_POST['name'],
+                'last-name' => $_POST['last-name'],
+                'checkbox1' => $_POST['checkbox1'],
+                'checkbox2' => $_POST['checkbox2'], ];
+            }
 
-        $viewData = [
-            'title' => SITENAME,
-            'seance' => $_POST['seance-data'],
-            'reservation_seats' => json_decode($_POST['seats']),
-            ];
+        $viewData['title'] = SITENAME;
+        $viewData['seance'] = $_POST['seance-data'];
+        $viewData['seats'] = json_decode($_POST['seats']);
 
         $this->view('reservation/confirm_reservation', $viewData);
     }
 
-    public function confirmed(){
-
-        $_POST['reserved-seats'] = json_decode($_POST['reserved-seats']);
-        $_POST['seance-data'] = json_decode($_POST['seance-data']);
-        $reservation_ok = $this->check_reservation($_POST['reserved-seats'], $_POST['seance-data']);
-
+    private function confirmed($post_data){
+        $post_data['seats'] = json_decode($post_data['seats']);
+        $post_data['seance-data'] = json_decode($post_data['seance-data']);
+        $reservation_ok = $this->check_reservation($post_data['seats'], $post_data['seance-data']);
         if($reservation_ok === 1){
-            $this->send_reservation_email($_POST);
-            $this->book_a_seats($_POST);
+            $this->send_reservation_email($post_data);
+            $this->book_a_seats($post_data);
         }
 
         $viewData = [
             'title' => SITENAME,
-            'reservation_data' => $_POST,
+            'reservation_data' => $post_data,
             'confirm' => $reservation_ok,
         ];
 
@@ -49,7 +59,7 @@ class reservation extends controller {
 
         $checkRow = 0;
         $reservation_txt = '';
-        $seats = $data['reserved-seats'];
+        $seats = $data['seats'];
 
         foreach ($seats as $seat){
             $row_seat = explode(".", $seat);
@@ -100,7 +110,7 @@ MIEJSCA: '.  $reservation_txt ;
         $reservation_data->setEmail($data['email']);
         $reservation_data->setName($data['name']);
         $reservation_data->setLastName($data['last-name']);
-        $reservation_data->setReservedSeats($data['reserved-seats']);
+        $reservation_data->setReservedSeats($data['seats']);
         $reservation_data->setMovieTitleOriginal($data['seance-data']->title_original);
         $reservation_data->setMovieTitlePl($data['seance-data']->title_pl);
         $reservation_data->setReservationDate($data['seance-data']->date);

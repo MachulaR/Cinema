@@ -9,5 +9,4 @@ If you wanna test it at fullest, do not forget to change an email in app/control
 
 Things to do:
 * Scrap hall number (for now it's randomizing number).
-* Captcha
 * Set max time for reservation steps.
